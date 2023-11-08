@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fetch examples</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+
+<body>
+
+    <div class="container">
+        <button class="btn btn-primary d-block mx-auto mt-4" onclick="fetchData()">Fetch random users data</button>
+        <div class="row justify-content-center my-4">
+            <div class="col-8">
+                <ul id="list" class="list-group">
+                    <!-- list items generati dinamicamente DOPO la risposta del server -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="row gx-2" id="disney">
+
+        </div>
+    </div>
+
+
+    <script>
+        const fetchData = () => {
+            // inviamo una richiesta HTTP di tipo GET (get è implicito e default)
+            fetch("https://randomuser.me/api/?results=5")
+                .then(response => {
+                    console.log(response)
+                    if (!response.ok) {
+                        if (response.status === 400) { throw new Error("Bad Request") }
+                        if (response.status === 401) { throw new Error("Unauthorized") }
+                        if (response.status === 403) { throw new Error("Forbidden") }
+                        if (response.status === 404) { throw new Error("Not found") }
+
+                        throw new Error("Generic Fetching error")
+                    }
+
+
+                    return response.json()
+                })
+                .then(usersObj => {
+                    // a questo livello siamo sicuri di avere il dato, al momento giusto in cui è arrivato ed è disponibile
+                    // dovremo quindi operare NECESSARIAMENTE all'interno di questo contesto
+
+                    // DOM MANIPULATION...
+                    console.log(usersObj)
+
+                    const list = document.getElementById("list")
+
+                    usersObj.results.forEach(user => {
+                        const li = document.createElement("li")
+                        li.className = "list-group-item"
+
+                        li.innerText = user.name.first + " " + user.name.last + ", email: " + user.email
+
+                        list.appendChild(li)
+                    })
+                })
+                .catch(error => console.log("CATCH BLOCK", error))
+        }
+
+
+        // Seconda API
+
+        window.onload = () =>
+            fetch("https://api.disneyapi.dev/character")
+                .then(response => response.json())
+                .then(charactersObj => {
+                    charactersObj.data.forEach(char => {
+                        if (char.imageUrl) {
+                            const row = document.getElementById("disney")
+                            const col = document.createElement("div")
+                            col.className = "col-12 col-sm-6 col-md-4 col-lg-3 position-relative mb-2"
+
+                            const img = document.createElement("img")
+                            img.className = "w-100 object-fit-cover rounded shadow-sm"
+                            img.style.height = "300px"
+                            img.src = char.imageUrl
+
+                            const h3 = document.createElement("h3")
+                            h3.className = "position-absolute top-50 start-50 translate-middle fs-5 fw-bolder text-white"
+                            h3.innerText = char.name
+
+                            col.appendChild(img)
+                            col.appendChild(h3)
+                            row.appendChild(col)
+                        }
+                    }
+                    )
+                })
+                .catch(err => console.log(err))
+    </script>
+</body>
+
+</html>
