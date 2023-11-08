@@ -31,9 +31,12 @@
         const fetchData = () => {
             // inviamo una richiesta HTTP di tipo GET (get è implicito e default)
             fetch("https://randomuser.me/api/?results=5")
+                // ricevo il valore in uscita della fetch nel primo then tramite parametro della callback
                 .then(response => {
+                    // ho ricevuto un response object da cui posso leggere lo status della risposta e decidere come procedere
                     console.log(response)
                     if (!response.ok) {
+                        // gestisco eventuali problemi lanciando un errore che mi farebbe saltare al .catch() direttamente per gestirlo in quel blocco
                         if (response.status === 400) { throw new Error("Bad Request") }
                         if (response.status === 401) { throw new Error("Unauthorized") }
                         if (response.status === 403) { throw new Error("Forbidden") }
@@ -42,10 +45,14 @@
                         throw new Error("Generic Fetching error")
                     }
 
-
+                    // questo return avverrà solo ed esclusivamente se non c'è stato un precedente throw
+                    // stiamo ritornando l'operazione response.json() che è una Promise a sua volta e ha bisogno di tempo per risolversi
                     return response.json()
                 })
+                // con questo then riusciremo ad aspettare il tempo necessario alla risoluzione del metodo .json() che fa il parse del body della response
                 .then(usersObj => {
+                    // dentro il parametro di questa callback abbiamo sempre il dato fornito dalle API pronto per essere utilizzato
+
                     // a questo livello siamo sicuri di avere il dato, al momento giusto in cui è arrivato ed è disponibile
                     // dovremo quindi operare NECESSARIAMENTE all'interno di questo contesto
 
@@ -63,6 +70,7 @@
                         list.appendChild(li)
                     })
                 })
+                //il catch gestisce l'errore secondo le istruzioni che definiamo noi a prescindere
                 .catch(error => console.log("CATCH BLOCK", error))
         }
 
